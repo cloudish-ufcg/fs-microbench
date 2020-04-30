@@ -62,7 +62,7 @@ static void *request (void *arg) {
 	if (debug) {
 	    load->begin[i] = stamp ();
 	}
-        load->rt_count[i] = read (load->fd, load->buf, load->blksize);
+        load->rt_count[i] = pread (load->fd, load->buf, load->blksize, load->blksize * i);
 	if (debug) {
 	    load->end[i] = stamp ();
 	}
@@ -147,4 +147,3 @@ int main (int argc, char* argv[]) {
 
     return 0;
 }
-

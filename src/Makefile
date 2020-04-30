@@ -2,7 +2,7 @@ CC=gcc
 CCFLAGS += -g -Wall -Wextra
 
 # created to the list
-MAIN = rr rw seqr seqw background
+MAIN = rr rw sr sw background
 all : $(MAIN)
 
 rr.o : rr.c
@@ -17,16 +17,16 @@ rw.o : rw.c
 rw : rw.o
 	$(CC) $(CCFLAGS) $^ -o $@ -pthread -lrt
 
-seqr.o : seqr.c
-	$(CC) $(CCFLAGS) -c seqr.c
+sr.o : sr.c
+	$(CC) $(CCFLAGS) -c sr.c
 
-seqr : seqr.o
+sr : sr.o
 	$(CC) $(CCFLAGS) $^ -o $@ -pthread -lrt -lm
 
-seqw.o : seqw.c
-	$(CC) $(CCFLAGS) -c seqw.c
+sw.o : sw.c
+	$(CC) $(CCFLAGS) -c sw.c
 
-seqw : seqw.o
+sw : sw.o
 	$(CC) $(CCFLAGS) $^ -o $@ -pthread -lrt -lm
 
 background.o : background.c

@@ -62,7 +62,7 @@ static void *request (void *arg) {
 	if (debug) {
 	    load->begin[i] = stamp ();
 	}
-        load->rt_count[i] = write (load->fd, load->buf, load->blksize);
+        load->rt_count[i] = pwrite (load->fd, load->buf, load->blksize, load->blksize*i);
 	if (debug) {
 	    load->end[i] = stamp ();
 	}
