@@ -1,4 +1,5 @@
 #define _LARGEFILE64_SOURCE
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -52,20 +53,20 @@ static void *request (void *arg) {
     int i;
     thread_load* load = arg;
 
-    lseek (load->fd, start_offset, SEEK_SET);
+    //lseek (load->fd, start_offset, SEEK_SET);
 
     for (i = 0; i < load->nreq; i++) {
         if (load->delay > 0) {
-	    usleep (load->delay);
-	}
+	        usleep (load->delay);
+	    }
 
-	if (debug) {
-	    load->begin[i] = stamp ();
-	}
-        load->rt_count[i] = read (load->fd, load->buf, load->blksize);
-	if (debug) {
-	    load->end[i] = stamp ();
-	}
+    	if (debug) {
+	        load->begin[i] = stamp ();
+    	}
+        load->rt_count[i] = pread (load->fd, load->buf, load->blksize, load->blksize*i);
+	    if (debug) {
+	        load->end[i] = stamp ();
+	    }
     }
 
     return NULL;
@@ -98,7 +99,7 @@ int main (int argc, char* argv[]) {
     for (i = 0; i < num_threads; i++) {
 
 	snprintf (pathbuf, sizeof pathbuf, "%s%d", path, i);
-	fd = open (pathbuf, O_RDWR | O_LARGEFILE, ACCESS_PERMISSION);
+	fd = open (pathbuf, O_RDONLY | O_LARGEFILE, ACCESS_PERMISSION | O_DIRECT, S_IRWXU);
 	if (fd < 0) {
   	    fprintf (stderr, "Error opening file: %s\n", strerror (errno));
 	    exit (EXIT_FAILURE);
@@ -125,17 +126,20 @@ int main (int argc, char* argv[]) {
 
     //safe random offset function, we are going to execute nops sequential
     //requests, each requesting blksize bytes
-    start_offset = (long) ((rand() / (double) RAND_MAX) *
-		    (load[0].file_size - (blksize * num_ops_per_thread)));
+    //start_offset = (long) ((rand() / (double) RAND_MAX) *
+	//	    (load[0].file_size - (blksize * num_ops_per_thread)));
+    start_offset = 0;
 
     pthread_t *requesters = (pthread_t*) malloc (sizeof (pthread_t) * num_threads);
     for (i = 0; i < num_threads; i++) {
         pthread_create (&requesters[i], NULL, request, (void *) &load[i]);
-    }
+   }
 
    for (i = 0; i < num_threads; i++) {
        pthread_join (requesters[i], NULL);
     }
+
+    request ((void*) &load[i]);
     if (debug) {
         for (i = 0; i < num_threads; i++) {
 	    for (j = 0; j < load[i].nreq; j++) {

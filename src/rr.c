@@ -1,4 +1,5 @@
 #define _LARGEFILE64_SOURCE
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -102,7 +103,7 @@ int main (int argc, char* argv[]) {
     for (i = 0; i < num_threads; i++) {
 
 	snprintf (pathbuf, sizeof pathbuf, "%s%d", path, i);
-	fd = open (pathbuf, O_RDWR | O_LARGEFILE, ACCESS_PERMISSION);
+	fd = open (pathbuf, O_RDONLY | O_LARGEFILE, ACCESS_PERMISSION | O_DIRECT, S_IRWXU);
 	if (fd < 0) {
   	    fprintf (stderr, "Error opening file: %s\n", strerror (errno));
 	    exit (EXIT_FAILURE);
